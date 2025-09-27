@@ -14,7 +14,7 @@
   "listAsyncJS": [],
   "template": {
     "name": "zaui-fashion",
-    "apiUrl": "https://osaci.vn/api",
+    "apiUrl": "http://localhost:8000/api",
     "oaIDtoOpenChat": "4318657068771012646"
   }
 }

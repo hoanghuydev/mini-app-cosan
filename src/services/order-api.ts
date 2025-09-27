@@ -26,7 +26,40 @@ export interface OrderResponse {
   };
 }
 
+export interface OrderDetailResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    orderId: string;
+    customerName: string;
+    phone: string;
+    status: number;
+    statusText: string;
+    province: string;
+    district: string;
+    ward: string;
+    address: string;
+    fullAddress: string;
+    note: string;
+    totalAmount: number;
+    originalAmount: number;
+    products: Array<{
+      id: number;
+      name: string;
+      price: number;
+      quantity: number;
+      image: string;
+      total: number;
+    }>;
+    createdAt: string;
+    createdDate: string;
+    shippingDate: string;
+    createdBy: number;
+  };
+}
+
 const ORDER_API_PATH = "/orders/create.php";
+const ORDER_DETAIL_API_PATH = "/orders/detail.php";
 
 export const createOrder = async (orderData: OrderRequest): Promise<OrderResponse> => {
   try {
@@ -43,6 +76,25 @@ export const createOrder = async (orderData: OrderRequest): Promise<OrderRespons
   } catch (error) {
     console.error('Error creating order:', error);
     // Chỉ trả về fallback message khi không thể kết nối đến server
+    return {
+      success: false,
+      message: "Không thể kết nối đến server. Vui lòng thử lại sau.",
+    };
+  }
+};
+
+export const getOrderDetail = async (orderId: string): Promise<OrderDetailResponse> => {
+  try {
+    const response = await request<OrderDetailResponse>(`${ORDER_DETAIL_API_PATH}?orderId=${orderId}&token=Kwewjf23Kasfj!kCAMp23daed@mqpqwcasw`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    
+    return response;
+  } catch (error) {
+    console.error('Error getting order detail:', error);
     return {
       success: false,
       message: "Không thể kết nối đến server. Vui lòng thử lại sau.",

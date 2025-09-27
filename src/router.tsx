@@ -9,6 +9,8 @@ import ProfilePage from "@/pages/profile";
 import SearchPage from "@/pages/search";
 import { createBrowserRouter } from "react-router-dom";
 import { getBasePath } from "@/utils/zma";
+import CheckoutSuccessPage from "./pages/checkout-success";
+import OrderDetailPage from "./pages/order-detail";
 
 const router = createBrowserRouter(
   [
@@ -79,6 +81,20 @@ const router = createBrowserRouter(
           element: <SearchPage />,
           handle: {
             title: "Tìm kiếm",
+          },
+        },
+        {
+          path: "/order-detail/:id",
+          element: <OrderDetailPage />,
+          handle: {
+            title: "Chi tiết đơn hàng",
+          },
+        },
+        {
+          path: "/checkout-success/:id",
+          element: <CheckoutSuccessPage />,
+          handle: {
+            title: "Đặt hàng thành công",
           },
         },
       ],

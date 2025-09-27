@@ -158,13 +158,13 @@ export default function CheckoutPage() {
       const result = await createOrder(orderData);
       
       if (result.success) {
-        toast.success(`Đặt hàng thành công! Mã đơn hàng: ${result.data?.orderId}`);
+        // toast.success(`Đặt hàng thành công! Mã đơn hàng: ${result.data?.orderId}`);
         
         // Xóa giỏ hàng
         setCart([]);
         
-        // Chuyển về trang chủ
-        navigate("/");
+        // Chuyển đến trang checkout success với orderId
+        navigate(`/checkout-success/${result.data?.orderId}?status=success`);
       } else {
         toast.error(result.message || "Có lỗi xảy ra khi đặt hàng");
       }

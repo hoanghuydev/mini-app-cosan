@@ -35,8 +35,8 @@ export const ScrollRestoration: FC = () => {
     if (content) {
       if (handle.scrollRestoration !== undefined) {
         content.scrollTo(0, handle.scrollRestoration);
-        document.querySelector('#srcoll-div')!.scrollIntoView({ behavior: "auto", block: "start" });
-        document.querySelector("#scroll-container")!.scrollTo(0,0)
+        document.querySelector('#srcoll-div')?.scrollIntoView({ behavior: "auto", block: "start" });
+        document.querySelector("#scroll-container")?.scrollTo(0,0)
       } else {
         const key = `${location.pathname}${location.search}`;
         if (scrollPositions[key]) {
