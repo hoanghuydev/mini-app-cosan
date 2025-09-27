@@ -11,6 +11,7 @@ import OrderSummary from "./order-summary";
 import { Province, District, Ward } from "./address-selects";
 import { fetchProvinces, fetchDistricts, fetchWards } from "@/services/address-api";
 import { createOrder } from "@/services/order-api";
+import { Payment } from "zmp-sdk";
 
 export default function CheckoutPage() {
   const cart = useAtomValue(cartState);
@@ -138,37 +139,49 @@ export default function CheckoutPage() {
     
     try {
       // Prepare order data
-      const orderData = {
-        cart: cart.map(item => ({
-          productId: item.product.id,
-          quantity: item.quantity
-        })),
-        customerInfo: {
-          name: formData.name,
-          phone: formData.phone,
-          province: provinces.find(p => p.code === formData.province)?.name || '',
-          district: districts.find(d => d.code === formData.district)?.name || '',
-          ward: wards.find(w => w.code === formData.ward)?.name || '',
-          address: formData.address,
-          note: formData.note
-        }
-      };
+      // const orderData = {
+      //   cart: cart.map(item => ({
+      //     productId: item.product.id,
+      //     quantity: item.quantity
+      //   })),
+      //   customerInfo: {
+      //     name: formData.name,
+      //     phone: formData.phone,
+      //     province: provinces.find(p => p.code === formData.province)?.name || '',
+      //     district: districts.find(d => d.code === formData.district)?.name || '',
+      //     ward: wards.find(w => w.code === formData.ward)?.name || '',
+      //     address: formData.address,
+      //     note: formData.note
+      //   }
+      // };
 
-      // Call API to create order
-      const result = await createOrder(orderData);
-      
-      if (result.success) {
-        // toast.success(`Đặt hàng thành công! Mã đơn hàng: ${result.data?.orderId}`);
-        
-        // Xóa giỏ hàng
-        setCart([]);
-        
-        // Chuyển đến trang checkout success với orderId
-        navigate(`/checkout-success/${result.data?.orderId}?status=success`);
-      } else {
-        toast.error(result.message || "Có lỗi xảy ra khi đặt hàng");
+
+      const orderData = {
+        desc : "Đặt hàng từ zalo mini app",
+        amount : total,
+        item : cart.map(item => ({
+          id : item.product.id,
+          name : item.product.name,
+          quantity : item.quantity,
+        })),
+        mac : "mac",
+        method : {
+          id : "COD",
+          isCustom : false,
+        },
+        success: (data) => {
+          setCart([]);
+
+          navigate(`/checkout-success/${data.orderId}?status=success`);
+        },
+        fail: (err) => {
+          toast.error(err.message || "Có lỗi xảy ra khi đặt hàng");
+          console.log(err);
+        },
       }
-      
+
+      Payment.createOrder(orderData);
+
     } catch (error) {
       console.error('Order creation error:', error);
       toast.error(error instanceof Error ? error.message : "Có lỗi xảy ra, vui lòng thử lại");
