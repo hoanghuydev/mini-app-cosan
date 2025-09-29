@@ -11,6 +11,7 @@ import { createBrowserRouter } from "react-router-dom";
 import { getBasePath } from "@/utils/zma";
 import CheckoutSuccessPage from "./pages/checkout-success";
 import OrderDetailPage from "./pages/order-detail";
+import CheckTransaction from "./pages/check-transaction";
 
 const router = createBrowserRouter(
   [
@@ -95,6 +96,13 @@ const router = createBrowserRouter(
           element: <CheckoutSuccessPage />,
           handle: {
             title: "Đặt hàng thành công",
+          },
+        },
+        {
+          path: "/check-transaction",
+          element: <CheckTransaction />,
+          handle: {
+            title: "Kiểm tra giao dịch",
           },
         },
       ],

@@ -10,8 +10,9 @@ import ShippingForm, { ShippingFormData } from "./shipping-form";
 import OrderSummary from "./order-summary";
 import { Province, District, Ward } from "./address-selects";
 import { fetchProvinces, fetchDistricts, fetchWards } from "@/services/address-api";
-import { createOrder } from "@/services/order-api";
+import { createOrder, getMac, OrderRequest } from "@/services/order-api";
 import { Payment } from "zmp-sdk";
+import { generateMac } from "@/utils/checkout-sdk";
 
 export default function CheckoutPage() {
   const cart = useAtomValue(cartState);
@@ -113,66 +114,88 @@ export default function CheckoutPage() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = async () => {
-    // Validation
+  const createOrderMerchant = async (): Promise<string | undefined> => {
+    const merchantOrderData: OrderRequest = {
+      cart: cart.map(item => ({
+        productId: item.product.id,
+        quantity: item.quantity
+      })),
+      customerInfo: {
+        name: formData.name,
+        phone: formData.phone,
+        province: provinces.find(p => p.code === formData.province)?.name || '',
+        district: districts.find(d => d.code === formData.district)?.name || '',
+        ward: wards.find(w => w.code === formData.ward)?.name || '',
+        address: formData.address,
+        note: formData.note
+      }
+    };
+
+    // Call api create order
+    const response = await createOrder(merchantOrderData);
+    return response.data?.orderId;
+  }
+
+  const validateForm = () => {
     if (!formData.name.trim()) {
       toast.error("Vui lòng nhập họ và tên");
-      return;
+      return false;
     }
     
     if (!formData.phone.trim()) {
       toast.error("Vui lòng nhập số điện thoại");
-      return;
+      return false;
     }
     
     if (!formData.province || !formData.district || !formData.ward) {
       toast.error("Vui lòng chọn đầy đủ tỉnh/huyện/xã");
-      return;
+      return false;
     }
     
     if (!formData.address.trim()) {
       toast.error("Vui lòng nhập địa chỉ cụ thể");
+      return false;
+    }
+    return true;
+  }
+
+  const macGenerate = async (): Promise<{mac: string, orderDataForMac: any}> => {
+    const orderDataForMac = {
+      amount : total,
+      desc : "Đặt hàng từ zalo mini app",
+      extradata : JSON.stringify({
+        customerName : formData.name.trim(),
+      }),
+      item : cart.map(item => ({
+        id : item.product.id,
+        amount : item.product.price * item.quantity,
+      })),
+      method : JSON.stringify({
+        id : "COD",
+        isCustom : false,
+      }),
+    }
+    const macResponse = await getMac(orderDataForMac);
+    return { mac: macResponse.data?.mac, orderDataForMac};
+  }
+
+  const handleSubmit = async () => {
+    // Validation
+    if (!validateForm()) {
       return;
     }
 
     setIsSubmitting(true);
     
     try {
-      // Prepare order data
-      // const orderData = {
-      //   cart: cart.map(item => ({
-      //     productId: item.product.id,
-      //     quantity: item.quantity
-      //   })),
-      //   customerInfo: {
-      //     name: formData.name,
-      //     phone: formData.phone,
-      //     province: provinces.find(p => p.code === formData.province)?.name || '',
-      //     district: districts.find(d => d.code === formData.district)?.name || '',
-      //     ward: wards.find(w => w.code === formData.ward)?.name || '',
-      //     address: formData.address,
-      //     note: formData.note
-      //   }
-      // };
-
-
+      const {mac, orderDataForMac} = await macGenerate();
       const orderData = {
-        desc : "Đặt hàng từ zalo mini app",
-        amount : total,
-        item : cart.map(item => ({
-          id : item.product.id,
-          name : item.product.name,
-          quantity : item.quantity,
-        })),
-        mac : "mac",
-        method : {
-          id : "COD",
-          isCustom : false,
-        },
-        success: (data) => {
+        ...orderDataForMac,
+        mac : mac || '',
+        success: async (data) => {
+          const orderId = await createOrderMerchant();
+          navigate(`/checkout-success/${orderId}?status=success`);
           setCart([]);
-
-          navigate(`/checkout-success/${data.orderId}?status=success`);
         },
         fail: (err) => {
           toast.error(err.message || "Có lỗi xảy ra khi đặt hàng");
@@ -181,7 +204,6 @@ export default function CheckoutPage() {
       }
 
       Payment.createOrder(orderData);
-
     } catch (error) {
       console.error('Order creation error:', error);
       toast.error(error instanceof Error ? error.message : "Có lỗi xảy ra, vui lòng thử lại");

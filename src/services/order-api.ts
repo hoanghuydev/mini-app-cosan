@@ -23,6 +23,7 @@ export interface OrderResponse {
     orderId: string;
     totalAmount: number;
     orderDate: string;
+    mac: string;
   };
 }
 
@@ -60,7 +61,7 @@ export interface OrderDetailResponse {
 
 const ORDER_API_PATH = "/orders/create.php";
 const ORDER_DETAIL_API_PATH = "/orders/detail.php";
-
+const ORDER_MAC_API_PATH = "/orders/zalo/mac.php";
 export const createOrder = async (orderData: OrderRequest): Promise<OrderResponse> => {
   try {
     const response = await request<OrderResponse>(ORDER_API_PATH, {
@@ -79,6 +80,26 @@ export const createOrder = async (orderData: OrderRequest): Promise<OrderRespons
     return {
       success: false,
       message: "Không thể kết nối đến server. Vui lòng thử lại sau.",
+    };
+  }
+};
+
+export const getMac = async (data: any): Promise<{success: boolean, message: string, data: {mac: string}}> => {
+  try {
+    const response = await request<any>(`${ORDER_MAC_API_PATH}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    return response;
+  } catch (error) {
+    console.error('Error getting mac:', error);
+    return {
+      success: false,
+      message: "Không thể kết nối đến server. Vui lòng thử lại sau.",
+      data: {mac: ''},
     };
   }
 };
