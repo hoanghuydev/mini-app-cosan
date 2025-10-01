@@ -9,7 +9,7 @@ export default function ShareButton(props: { product: Product }) {
       data: {
         title: props.product.name,
         thumbnail: props.product.thumbnail || "",
-        path: `/product/${props.product.id}`,
+        description: props.product.short_description || "",
       },
     });
   };

@@ -32,7 +32,7 @@ export default function Header() {
   if (handle?.logo) {
     return (
       <div className="h-14 w-full flex items-center px-4 py-2">
-        <img src={ASSETS_URL + "/images/logo.png"} className="max-h-full flex-none" alt="OSACI Logo" />
+        <img src="https://cosan.vn/storage/2023/09/logo-cosan.png" className="max-h-full flex-none" alt="OSACI Logo" />
       </div>
     );
   }

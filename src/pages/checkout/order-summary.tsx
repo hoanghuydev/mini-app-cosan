@@ -29,7 +29,7 @@ export default function OrderSummary({
           <div key={`${item.product.id}-${item.options?.size || ""}-${item.options?.color || ""}`} className="flex items-center space-x-3">
             <div className="relative">
               <img
-                src={item.product.image}
+                src={item.product.thumbnail_url}
                 alt={item.product.name}
                 className="w-16 h-16 object-cover rounded-lg"
               />

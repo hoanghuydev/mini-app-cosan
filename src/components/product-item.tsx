@@ -38,7 +38,7 @@ export default function ProductItem(props: ProductItemProps) {
             alt={props.product.name}
           />
           <div className="py-2">
-            <div className="text-3xs text-subtitle truncate">
+            <div className="text-3xs text-subtitle truncate h-[16px]">
               {props.product.category?.name}
             </div>
             <div className="text-xs h-9 line-clamp-2">{props.product.name}</div>

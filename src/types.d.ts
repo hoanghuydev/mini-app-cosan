@@ -1,58 +1,34 @@
 export interface Product {
   id: number;
   name: string;
+  short_name?: string;
+  official_name?: string;
+  product_line: string;
+  sku: string;
   price: number;
   original_price?: number;
-  discount_percent?: number;
-  slug?: string;
-  
-  // From products API
-  short_description?: string;
-  thumbnail?: string;
-  product_image?: string;
   weight?: string;
-  product_type?: number;
-  sort_order?: number;
-  
-  // From product-detail API  
-  short_name?: string;
-  tax_price?: number;
-  pcb_number?: string;
-  barcode?: string;
+  short_description?: string;
+  description?: string;
+  ingredients?: string;
+  usage_instructions?: string;
+  thumbnail_url: string;
+  images: Array<{
+    image_id: number;
+    file_url: string;
+    alt_text: string;
+    sort_order: number;
+    is_primary: number;
+  }>;
+  // Legacy fields for compatibility
+  image?: string;
+  thumbnail?: string;
   full_description?: string;
   detailed_ingredients?: string;
-  ingredients?: any[];
-  material?: string;
-  packaging?: string;
-  usage_instructions?: string;
-  precautions?: string;
-  images?: {
-    thumbnail?: string;
-    product_with_box?: string;
-    product_only?: string;
-    box_only?: string;
-  };
-  categories?: Array<{
-    id: number;
-    name: string;
-    code: string;
-  }>;
-  is_combo?: boolean;
-  stock_quantity?: number;
-  
-  // For compatibility with existing components
-  image?: string;
-  description?: string;
-  category_id?: number;
   category?: Category;
-  details?: Detail[];
-  sizes?: Size[];
   colors?: Color[];
-  social_links?: {
-    tiktok: string;
-    lazada: string;
-    shopee: string;
-  };
+  sizes?: Size[];
+  details?: Detail[];
 }
 
 export interface Category {

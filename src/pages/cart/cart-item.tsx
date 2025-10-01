@@ -89,7 +89,7 @@ export default function CartItem(props: CartItemProps) {
             }
           }}
         />
-        <img src={props.product.image} className="w-14 h-14 rounded-lg" />
+        <img src={props.product.thumbnail_url} className="w-14 h-14 rounded-lg" />
         <div className="py-4 pr-4 flex-1 border-b-[0.5px] border-black/10">
           <div className="text-sm">{props.product.name}</div>
           {displayOptions && (
@@ -100,9 +100,9 @@ export default function CartItem(props: CartItemProps) {
               <div className="text-xs font-medium text-primary">
                 {formatPrice(props.product.price)}
               </div>
-              {props.product.originalPrice && (
+              {props.product.original_price && (
                 <div className="line-through text-subtitle text-3xs">
-                  {formatPrice(props.product.originalPrice)}
+                  {formatPrice(props.product.original_price)}
                 </div>
               )}
             </div>

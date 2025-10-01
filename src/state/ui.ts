@@ -10,7 +10,7 @@ export const bannersState = atom(async () =>
             data: {
                 banners: string[];
             };
-        }>("/banners.php", {
+        }>("/banners", {
             success: false,
             data: { banners: [] }
         });

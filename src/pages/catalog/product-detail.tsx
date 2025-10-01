@@ -10,12 +10,14 @@ import { productState } from "@/state";
 import { formatPrice } from "@/utils/format";
 import ShareButton from "./share-buttont";
 import VariantPicker from "./variant-picker";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import Collapse from "@/components/collapse";
 import RelatedProducts from "./related-products";
 import { useAddToCart } from "@/hooks";
 import toast from "react-hot-toast";
 import { Color, Size } from "@/types";
+import useEmblaCarousel from 'embla-carousel-react';
+import Autoplay from 'embla-carousel-autoplay';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -23,6 +25,35 @@ export default function ProductDetailPage() {
   const product = useAtomValue(productState(Number(id)))!;
   const [selectedColor, setSelectedColor] = useState<Color>();
   const [selectedSize, setSelectedSize] = useState<Size>();
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  // Carousel setup with autoplay
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    { loop: true },
+    [Autoplay({ delay: 3000, stopOnInteraction: false })]
+  );
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect();
+    emblaApi.on('select', onSelect);
+    emblaApi.on('reInit', onSelect);
+  }, [emblaApi, onSelect]);
+
+  // Get images for carousel
+  const getProductImages = () => {
+    if (product.images && product.images.length > 0) {
+      return product.images.map(img => img.file_url);
+    }
+    return product.thumbnail_url ? [product.thumbnail_url] : [];
+  };
+
+  const productImages = getProductImages();
 
   useEffect(() => {
     setSelectedColor(product.colors?.[0]);
@@ -42,16 +73,47 @@ export default function ProductDetailPage() {
     <div className="w-full h-full flex flex-col">
       <div id="scroll-container" className="flex-1 overflow-y-auto">
         <div className="w-full px-4">
-          <div className="py-2">
-            <img
-              key={product.id}
-              src={product.images?.thumbnail || product.thumbnail || product.image}
-              alt={product.name}
-              className="w-full h-full object-cover rounded-lg"
-              style={{
-                viewTransitionName: `product-image-${product.id}`,
-              }}
-            />
+          <div className="py-2 max-w-100 overflow-hidden">
+            {productImages.length > 1 ? (
+              <div className="embla" ref={emblaRef}>
+                <div className="embla__container flex">
+                  {productImages.map((imageUrl, index) => (
+                    <div key={index} className="embla__slide flex-[0_0_100%] min-w-0">
+                      <img
+                        src={imageUrl}
+                        alt={`${product.name} - ${index + 1}`}
+                        className="w-full h-80 object-cover rounded-lg"
+                        style={{
+                          viewTransitionName: `product-image-${product.id}-${index}`,
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+                {/* Dots indicator */}
+                <div className="flex justify-center mt-3 space-x-2">
+                  {productImages.map((_, index) => (
+                    <button
+                      key={index}
+                      className={`w-2 h-2 rounded-full transition-colors ${
+                        index === selectedIndex ? 'bg-primary' : 'bg-gray-300'
+                      }`}
+                      onClick={() => emblaApi?.scrollTo(index)}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <img
+                key={product.id}
+                src={productImages[0] || '/placeholder-image.png'}
+                alt={product.name}
+                className="w-full h-80 object-cover rounded-lg"
+                style={{
+                  viewTransitionName: `product-image-${product.id}`,
+                }}
+              />
+            )}
           </div>
           <div className="text-xl font-medium text-primary">
             {formatPrice(product.price)}
@@ -61,7 +123,7 @@ export default function ProductDetailPage() {
               {formatPrice(product.original_price)}
             </div>
           )}
-          <div className="text-sm mt-1">{product.name}</div>
+          <div className="text-sm mt-1">{product.name ?? product.official_name}</div>
           
           {/* Mô tả sản phẩm */}
           {(product.short_description || product.full_description) && (
@@ -123,7 +185,7 @@ export default function ProductDetailPage() {
         <div className="px-4 py-4">
           <div className="space-y-4">
             {/* Thông tin cơ bản */}
-            {(product.pcb_number || product.barcode || product.weight) && (
+            {product.weight && product.weight.trim() && (
               <div className="bg-gray-50 rounded-lg p-4">
                 <div className="flex items-center mb-3">
                   <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
@@ -134,30 +196,16 @@ export default function ProductDetailPage() {
                   <h3 className="font-medium text-gray-900">Thông tin sản phẩm</h3>
                 </div>
                 <div className="space-y-2 text-sm">
-                  {product.pcb_number && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Số PCB:</span>
-                      <span className="font-medium">{product.pcb_number}</span>
-                    </div>
-                  )}
-                  {product.barcode && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Mã vạch:</span>
-                      <span className="font-medium">{product.barcode}</span>
-                    </div>
-                  )}
-                  {product.weight && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Trọng lượng:</span>
-                      <span className="font-medium">{product.weight}</span>
-                    </div>
-                  )}
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Trọng lượng:</span>
+                    <span className="font-medium">{product.weight}</span>
+                  </div>
                 </div>
               </div>
             )}
 
             {/* Thành phần chi tiết */}
-            {product.detailed_ingredients && (
+            {product.detailed_ingredients && product.detailed_ingredients.trim() && (
               <div className="bg-green-50 rounded-lg p-4">
                 <div className="flex items-center mb-3">
                   <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
@@ -167,14 +215,12 @@ export default function ProductDetailPage() {
                   </div>
                   <h3 className="font-medium text-gray-900">Thành phần chi tiết</h3>
                 </div>
-                <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
-                  {product.detailed_ingredients}
-                </div>
+                <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line" dangerouslySetInnerHTML={{ __html: product.detailed_ingredients }} />
               </div>
             )}
 
             {/* Hướng dẫn sử dụng */}
-            {product.usage_instructions && (
+            {product.usage_instructions && product.usage_instructions.trim() && (
               <div className="bg-blue-50 rounded-lg p-4">
                 <div className="flex items-center mb-3">
                   <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
@@ -184,55 +230,10 @@ export default function ProductDetailPage() {
                   </div>
                   <h3 className="font-medium text-gray-900">Hướng dẫn sử dụng</h3>
                 </div>
-                <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
-                  {product.usage_instructions}
-                </div>
+                <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line" dangerouslySetInnerHTML={{ __html: product.usage_instructions }} />
               </div>
             )}
 
-            {/* Lưu ý */}
-            {product.precautions && (
-              <div className="bg-yellow-50 rounded-lg p-4">
-                <div className="flex items-center mb-3">
-                  <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center mr-3">
-                    <svg className="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                    </svg>
-                  </div>
-                  <h3 className="font-medium text-gray-900">Lưu ý</h3>
-                </div>
-                <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line" dangerouslySetInnerHTML={{__html: product.precautions}}>
-                </div>
-              </div>
-            )}
-
-            {/* Thể chất và bao bì */}
-            {(product.material || product.packaging) && (
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-center mb-3">
-                  <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
-                    <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                    </svg>
-                  </div>
-                  <h3 className="font-medium text-gray-900">Thông tin khác</h3>
-                </div>
-                <div className="space-y-2 text-sm">
-                  {product.material && (
-                    <div>
-                      <span className="text-gray-600">Thể chất: </span>
-                      <span className="text-gray-900">{product.material}</span>
-                    </div>
-                  )}
-                  {product.packaging && (
-                    <div>
-                      <span className="text-gray-600">Bao bì: </span>
-                      <span className="text-gray-900">{product.packaging}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
         </div>
 

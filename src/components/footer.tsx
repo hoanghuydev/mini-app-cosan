@@ -10,11 +10,11 @@ const NAV_ITEMS = [
     path: "/",
     icon: HomeIcon,
   },
-  {
-    name: "Danh mục",
-    path: "/categories",
-    icon: CategoryIcon,
-  },
+  // {
+  //   name: "Danh mục",
+  //   path: "/categories",
+  //   icon: CategoryIcon,
+  // },
   {
     name: "Giỏ hàng",
     path: "/cart",
