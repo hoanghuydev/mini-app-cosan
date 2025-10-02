@@ -9,7 +9,11 @@ import toast from "react-hot-toast";
 import ShippingForm, { ShippingFormData } from "./shipping-form";
 import OrderSummary from "./order-summary";
 import { Province, District, Ward } from "./address-selects";
-import { fetchProvinces, fetchDistricts, fetchWards } from "@/services/address-api";
+import {
+  fetchProvinces,
+  fetchDistricts,
+  fetchWards,
+} from "@/services/address-api";
 import { createOrder, getMac, OrderRequest } from "@/services/order-api";
 import { Payment } from "zmp-sdk";
 import { generateMac } from "@/utils/checkout-sdk";
@@ -18,7 +22,7 @@ export default function CheckoutPage() {
   const cart = useAtomValue(cartState);
   const setCart = useSetAtom(cartState);
   const navigate = useNavigate();
-  
+
   const [formData, setFormData] = useState<ShippingFormData>({
     name: "",
     phone: "",
@@ -26,7 +30,7 @@ export default function CheckoutPage() {
     district: 0,
     ward: 0,
     address: "",
-    note: ""
+    note: "",
   });
 
   const [provinces, setProvinces] = useState<Province[]>([]);
@@ -36,7 +40,10 @@ export default function CheckoutPage() {
   const [isLoadingProvinces, setIsLoadingProvinces] = useState(true);
 
   // Tính toán giá trị
-  const subtotal = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+  const subtotal = cart.reduce(
+    (sum, item) => sum + item.product.price * item.quantity,
+    0
+  );
   const originalShippingFee = 30000;
   const discountedShippingFee = 0;
   const shippingDiscount = originalShippingFee - discountedShippingFee;
@@ -50,7 +57,7 @@ export default function CheckoutPage() {
         const provincesData = await fetchProvinces();
         setProvinces(provincesData);
       } catch (error) {
-        console.error('Failed to load provinces:', error);
+        console.error("Failed to load provinces:", error);
         toast.error("Không thể tải danh sách tỉnh thành");
       } finally {
         setIsLoadingProvinces(false);
@@ -75,14 +82,14 @@ export default function CheckoutPage() {
         try {
           const districtsData = await fetchDistricts(formData.province);
           setDistricts(districtsData);
-          setFormData(prev => ({ ...prev, district: 0, ward: 0 }));
+          setFormData((prev) => ({ ...prev, district: 0, ward: 0 }));
         } catch (error) {
-          console.error('Failed to load districts:', error);
+          console.error("Failed to load districts:", error);
           toast.error("Không thể tải danh sách quận/huyện");
         }
       } else {
         setDistricts([]);
-        setFormData(prev => ({ ...prev, district: 0, ward: 0 }));
+        setFormData((prev) => ({ ...prev, district: 0, ward: 0 }));
       }
     };
 
@@ -96,14 +103,14 @@ export default function CheckoutPage() {
         try {
           const wardsData = await fetchWards(formData.district);
           setWards(wardsData);
-          setFormData(prev => ({ ...prev, ward: 0 }));
+          setFormData((prev) => ({ ...prev, ward: 0 }));
         } catch (error) {
-          console.error('Failed to load wards:', error);
+          console.error("Failed to load wards:", error);
           toast.error("Không thể tải danh sách phường/xã");
         }
       } else {
         setWards([]);
-        setFormData(prev => ({ ...prev, ward: 0 }));
+        setFormData((prev) => ({ ...prev, ward: 0 }));
       }
     };
 
@@ -111,73 +118,82 @@ export default function CheckoutPage() {
   }, [formData.district]);
 
   const handleInputChange = (field: string, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const createOrderMerchant = async (): Promise<string | undefined> => {
     const merchantOrderData: OrderRequest = {
-      cart: cart.map(item => ({
+      cart: cart.map((item) => ({
         productId: item.product.id,
-        quantity: item.quantity
+        quantity: item.quantity,
       })),
       customerInfo: {
         name: formData.name,
         phone: formData.phone,
-        province: provinces.find(p => p.code === formData.province)?.name || '',
-        district: districts.find(d => d.code === formData.district)?.name || '',
-        ward: wards.find(w => w.code === formData.ward)?.name || '',
+        province:
+          provinces.find((p) => p.code === formData.province)?.name || "",
+        district:
+          districts.find((d) => d.code === formData.district)?.name || "",
+        ward: wards.find((w) => w.code === formData.ward)?.name || "",
         address: formData.address,
-        note: formData.note
-      }
+        note: formData.note,
+      },
     };
 
     // Call api create order
     const response = await createOrder(merchantOrderData);
-    return response.data?.orderId;
-  }
+    const orderCode = response.data?.order_code?.toString() || "";
+    if (!orderCode) {
+      toast.error("Lỗi khi tạo đơn hàng, vui lòng thử lại sau!");
+    }
+    return orderCode;
+  };
 
   const validateForm = () => {
     if (!formData.name.trim()) {
       toast.error("Vui lòng nhập họ và tên");
       return false;
     }
-    
+
     if (!formData.phone.trim()) {
       toast.error("Vui lòng nhập số điện thoại");
       return false;
     }
-    
+
     if (!formData.province || !formData.district || !formData.ward) {
       toast.error("Vui lòng chọn đầy đủ tỉnh/huyện/xã");
       return false;
     }
-    
+
     if (!formData.address.trim()) {
       toast.error("Vui lòng nhập địa chỉ cụ thể");
       return false;
     }
     return true;
-  }
+  };
 
-  const macGenerate = async (): Promise<{mac: string, orderDataForMac: any}> => {
+  const macGenerate = async (): Promise<{
+    mac: string;
+    orderDataForMac: any;
+  }> => {
     const orderDataForMac = {
-      amount : total,
-      desc : "Đặt hàng từ zalo mini app",
-      extradata : JSON.stringify({
-        customerName : formData.name.trim(),
+      amount: total,
+      desc: "Đặt hàng từ zalo mini app",
+      extradata: JSON.stringify({
+        customerName: formData.name.trim(),
       }),
-      item : cart.map(item => ({
-        id : item.product.id,
-        amount : item.product.price * item.quantity,
+      item: cart.map((item) => ({
+        id: item.product.id,
+        amount: item.product.price * item.quantity,
       })),
-      method : JSON.stringify({
-        id : "COD",
-        isCustom : false,
+      method: JSON.stringify({
+        id: "COD",
+        isCustom: false,
       }),
-    }
+    };
     const macResponse = await getMac(orderDataForMac);
-    return { mac: macResponse.data?.mac, orderDataForMac};
-  }
+    return { mac: macResponse.data?.mac, orderDataForMac };
+  };
 
   const handleSubmit = async () => {
     // Validation
@@ -186,12 +202,12 @@ export default function CheckoutPage() {
     }
 
     setIsSubmitting(true);
-    
+
     try {
-      const {mac, orderDataForMac} = await macGenerate();
+      const { mac, orderDataForMac } = await macGenerate();
       const orderData = {
         ...orderDataForMac,
-        mac : mac || '',
+        mac: mac || "",
         success: async (data) => {
           const orderId = await createOrderMerchant();
           navigate(`/checkout-success/${orderId}?status=success`);
@@ -201,12 +217,16 @@ export default function CheckoutPage() {
           toast.error(err.message || "Có lỗi xảy ra khi đặt hàng");
           console.log(err);
         },
-      }
+      };
 
       Payment.createOrder(orderData);
     } catch (error) {
-      console.error('Order creation error:', error);
-      toast.error(error instanceof Error ? error.message : "Có lỗi xảy ra, vui lòng thử lại");
+      console.error("Order creation error:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Có lỗi xảy ra, vui lòng thử lại"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -220,7 +240,9 @@ export default function CheckoutPage() {
     return (
       <div className="w-full h-full flex items-center justify-center">
         <div className="text-center">
-          <div className="text-sm text-gray-500">Đang tải danh sách tỉnh thành...</div>
+          <div className="text-sm text-gray-500">
+            Đang tải danh sách tỉnh thành...
+          </div>
         </div>
       </div>
     );
