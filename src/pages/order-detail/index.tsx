@@ -64,18 +64,6 @@ export default function OrderDetailPage({}: OrderDetailPageProps) {
     );
   }
 
-  const getStatusColor = (statusId: number) => {
-    switch (statusId) {
-      case 1: return "text-yellow-600 bg-yellow-100"; // Chờ xử lý
-      case 2: return "text-blue-600 bg-blue-100"; // Đã xác nhận
-      case 3: return "text-purple-600 bg-purple-100"; // Đang chuẩn bị
-      case 4: return "text-orange-600 bg-orange-100"; // Đang giao
-      case 5: return "text-red-600 bg-red-100"; // Đã hủy
-      case 6: return "text-gray-600 bg-gray-100"; // Hoàn trả
-      case 7: return "text-green-600 bg-green-100"; // Giao thành công
-      default: return "text-gray-600 bg-gray-100";
-    }
-  };
 
   const formatAddress = (orderData: OrderDetailResponse['data']) => {
     const parts = [
@@ -105,9 +93,9 @@ export default function OrderDetailPage({}: OrderDetailPageProps) {
         <div className="bg-white px-4 py-3 border-b">
           <div className="flex items-center justify-between">
             <h1 className="text-lg font-semibold">Chi tiết đơn hàng</h1>
-            <div className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(orderData.status_id)}`}>
-              {orderData.order_status}
-            </div>
+            <div className={`text-sm text-[${orderData.order_status.text_color}] bg-[${orderData.order_status.background_color}] rounded-full px-2 py-1`}>
+              <div dangerouslySetInnerHTML={{__html: orderData.order_status.icon}} />
+              {orderData.order_status.name}</div>
           </div>
           <p className="text-sm text-gray-500 mt-1">Mã đơn hàng: {orderData.order_code}</p>
           {orderData.tracking_number && (

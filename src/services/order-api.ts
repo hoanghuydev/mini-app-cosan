@@ -41,7 +41,6 @@ export interface OrderDetailResponse {
     district: string;
     province: string;
     category_id: number | null;
-    status_id: number;
     order_source_id: number;
     total_amount: string;
     commission_rate_at_creation: string;
@@ -58,7 +57,13 @@ export interface OrderDetailResponse {
     total_outstanding_amount: string;
     deleted_at: string | null;
     is_deleted: number;
-    order_status: string;
+    order_status: {
+      status_id: number;
+      name: string;
+      text_color: string;
+      background_color: string;
+      icon: string;
+    };
     order_items: Array<{
       order_item_id: number;
       order_id: number;
