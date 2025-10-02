@@ -5,7 +5,7 @@ import { requestWithFallback } from "@/utils/request";
 export const categoriesState = atom(async () => {
   try {
     const response = await requestWithFallback<{
-      success: boolean;
+      returnCode: number;
       data: {
         categories: Array<{
           id: number;
@@ -18,11 +18,11 @@ export const categoriesState = atom(async () => {
         structure: string;
       };
     }>("/categories.php?type=product&include_children=false", {
-      success: false,
+      returnCode: 0,
       data: { categories: [], structure: "flat" }
     });
 
-    if (response.success && response.data.categories) {
+    if (response.returnCode == 1 && response.data.categories) {
       return response.data.categories.map((cat) => ({
         id: cat.id,
         name: cat.name,

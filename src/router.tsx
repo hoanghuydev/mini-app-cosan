@@ -85,7 +85,7 @@ const router = createBrowserRouter(
           },
         },
         {
-          path: "/order-detail/:id",
+          path: "/order-detail/:code",
           element: <OrderDetailPage />,
           handle: {
             title: "Chi tiết đơn hàng",

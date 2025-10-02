@@ -6,15 +6,15 @@ export const bannersState = atom(async () =>
 { 
     try {
         const response = await requestWithFallback<{
-            success: boolean;
+            returnCode: number;
             data: {
                 banners: string[];
             };
         }>("/banners", {
-            success: false,
+            returnCode: 0,
             data: { banners: [] }
         });
-        return response.data.banners;
+        return response.returnCode == 1 ? response.data.banners : [];
       } catch (error) {
         console.error("Error fetching banners:", error);
         return [];

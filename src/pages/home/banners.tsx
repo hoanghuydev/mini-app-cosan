@@ -5,10 +5,7 @@ import { bannersState } from "@/state";
 export default function Banners() {
   const banners = useAtomValue(bannersState);
 
-  const bannerAlts = [
-    "Banner Serum Hana Heal - Sản phẩm nổi bật của OSACI",
-    "Banner bộ 4 sản phẩm OSACI"
-  ];
+ 
 
   return (
     <Carousel
@@ -17,7 +14,7 @@ export default function Banners() {
           key={index}
           className="w-full rounded" 
           src={banner} 
-          alt={bannerAlts[index] || "Banner OSACI"} 
+          alt={"Banner Cosan Cosmetic"} 
         />
       ))}
     />

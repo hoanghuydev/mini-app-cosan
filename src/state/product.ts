@@ -12,17 +12,17 @@ import { requestWithFallback } from "@/utils/request";
 export const featureProductsState = atom(async () => {
   try {
     const response = await requestWithFallback<{
-      success: boolean;
+      returnCode: number;
       data: Product[];
     }>(
       "/products?limit=10&page=1", 
       {
-        success: false,
+        returnCode: 0,
         data: []
       }
     );
 
-    if (response.success && response.data) {
+    if (response.returnCode == 1 && response.data) {
       return response.data.map(product => ({
         ...product,
         image: product.thumbnail_url,
@@ -43,17 +43,17 @@ export const featureProductsState = atom(async () => {
 export const productsState = atom(async () => {
   try {
     const response = await requestWithFallback<{
-      success: boolean;
+      returnCode: number;
       data: Product[];
     }>(
       "/products", 
       {
-        success: false,
+        returnCode: 0,
         data: []
       }
     );
 
-    if (response.success && response.data) {
+    if (response.returnCode == 1 && response.data) {
       return response.data.map(product => ({
         ...product,
         image: product.thumbnail_url,
@@ -81,10 +81,10 @@ export const productState = atomFamily((id: number) =>
   atom(async (): Promise<Product> => {
     try {
       const response = await requestWithFallback<{
-        success: boolean;
+        returnCode: number;
         data: Product;
       }>(`/products/${id}`, {
-        success: false,
+        returnCode: 0,
         data: {
           id: 0,
           name: "",
@@ -96,7 +96,7 @@ export const productState = atomFamily((id: number) =>
         }
       });
 
-      if (response.success && response.data && response.data.id > 0) {
+      if (response.returnCode == 1 && response.data && response.data.id > 0) {
         const product = response.data;
         return product;
       }
