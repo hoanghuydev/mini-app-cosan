@@ -123,7 +123,7 @@ export default function ProductDetailPage() {
               {formatPrice(product.original_price)}
             </div>
           )}
-          <div className="text-sm mt-1">{product.name ?? product.official_name}</div>
+          <div className="text-lg font-semibold mt-1">{product.name ?? product.official_name}</div>
           
           {/* Mô tả sản phẩm */}
           {(product.short_description || product.full_description) && (
