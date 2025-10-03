@@ -11,7 +11,9 @@ interface OrderDetailPageProps {}
 export default function OrderDetailPage({}: OrderDetailPageProps) {
   const { code } = useParams<{ code: string }>();
   const navigate = useNavigate();
-  const [orderData, setOrderData] = useState<OrderDetailResponse['data'] | null>(null);
+  const [orderData, setOrderData] = useState<
+    OrderDetailResponse["data"] | null
+  >(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,7 +27,7 @@ export default function OrderDetailPage({}: OrderDetailPageProps) {
       try {
         setLoading(true);
         const result = await getOrderDetail(code);
-        
+
         if (result.returnCode === 1 && result.data) {
           setOrderData(result.data);
         } else {
@@ -33,7 +35,7 @@ export default function OrderDetailPage({}: OrderDetailPageProps) {
           navigate("/");
         }
       } catch (error) {
-        console.error('Error fetching order detail:', error);
+        console.error("Error fetching order detail:", error);
         toast.error("Có lỗi xảy ra khi tải thông tin đơn hàng");
         navigate("/");
       } finally {
@@ -48,7 +50,9 @@ export default function OrderDetailPage({}: OrderDetailPageProps) {
     return (
       <div className="w-full h-full flex items-center justify-center">
         <div className="text-center">
-          <div className="text-sm text-gray-500">Đang tải thông tin đơn hàng...</div>
+          <div className="text-sm text-gray-500">
+            Đang tải thông tin đơn hàng...
+          </div>
         </div>
       </div>
     );
@@ -58,31 +62,32 @@ export default function OrderDetailPage({}: OrderDetailPageProps) {
     return (
       <div className="w-full h-full flex items-center justify-center">
         <div className="text-center">
-          <div className="text-sm text-gray-500">Không tìm thấy thông tin đơn hàng</div>
+          <div className="text-sm text-gray-500">
+            Không tìm thấy thông tin đơn hàng
+          </div>
         </div>
       </div>
     );
   }
 
-
-  const formatAddress = (orderData: OrderDetailResponse['data']) => {
+  const formatAddress = (orderData: OrderDetailResponse["data"]) => {
     const parts = [
-      orderData.address,
-      orderData.ward_commune,
-      orderData.district,
-      orderData.province
+      orderData?.address,
+      orderData?.ward_commune,
+      orderData?.district,
+      orderData?.province,
     ].filter(Boolean);
     return parts.join(", ");
   };
 
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleString('vi-VN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
+    return date.toLocaleString("vi-VN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -93,13 +98,24 @@ export default function OrderDetailPage({}: OrderDetailPageProps) {
         <div className="bg-white px-4 py-3 border-b">
           <div className="flex items-center justify-between">
             <h1 className="text-lg font-semibold">Chi tiết đơn hàng</h1>
-            <div className={`text-sm text-[${orderData.order_status.text_color}] bg-[${orderData.order_status.background_color}] rounded-full px-2 py-1`}>
-              <div dangerouslySetInnerHTML={{__html: orderData.order_status.icon}} />
-              {orderData.order_status.name}</div>
+            <div
+              className={`px-2 py-1 rounded-lg bg-${orderData?.order_status?.background_color} text-${orderData?.order_status?.text_color}`}
+            >
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: orderData?.order_status?.icon,
+                }}
+              />
+              {orderData?.order_status?.name}
+            </div>
           </div>
-          <p className="text-sm text-gray-500 mt-1">Mã đơn hàng: {orderData.order_code}</p>
+          <p className="text-sm text-gray-500 mt-1">
+            Mã đơn hàng: {orderData.order_code}
+          </p>
           {orderData.tracking_number && (
-            <p className="text-sm text-gray-500">Mã vận đơn: {orderData.tracking_number}</p>
+            <p className="text-sm text-gray-500">
+              Mã vận đơn: {orderData.tracking_number}
+            </p>
           )}
         </div>
 
@@ -109,20 +125,28 @@ export default function OrderDetailPage({}: OrderDetailPageProps) {
           <div className="space-y-1">
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Họ tên:</span>
-              <span className="text-sm font-medium">{orderData.customer.name}</span>
+              <span className="text-sm font-medium">
+                {orderData.customer.name}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Số điện thoại:</span>
-              <span className="text-sm font-medium">{orderData.customer_phone.phone}</span>
+              <span className="text-sm font-medium">
+                {orderData.customer_phone.phone}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Địa chỉ:</span>
-              <span className="text-sm font-medium text-right max-w-[60%]">{formatAddress(orderData)}</span>
+              <span className="text-sm font-medium text-right max-w-[60%]">
+                {formatAddress(orderData)}
+              </span>
             </div>
             {orderData.notes && (
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Ghi chú:</span>
-                <span className="text-sm font-medium text-right max-w-[60%]">{orderData.notes}</span>
+                <span className="text-sm font-medium text-right max-w-[60%]">
+                  {orderData.notes}
+                </span>
               </div>
             )}
           </div>
@@ -133,11 +157,14 @@ export default function OrderDetailPage({}: OrderDetailPageProps) {
           <h2 className="text-base font-semibold mb-3">Sản phẩm đã đặt</h2>
           <div className="space-y-3">
             {orderData.order_items.map((item, index) => (
-              <div key={item.order_item_id} className="flex items-center space-x-3">
+              <div
+                key={item.order_item_id}
+                className="flex items-center space-x-3"
+              >
                 <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
                   {item.product.image ? (
-                    <img 
-                      src={item.product.image} 
+                    <img
+                      src={item.product.image}
                       alt={item.product.name}
                       className="w-full h-full object-cover rounded-lg"
                     />
@@ -146,10 +173,16 @@ export default function OrderDetailPage({}: OrderDetailPageProps) {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-medium text-gray-900 truncate">{item.product.name}</h3>
+                  <h3 className="text-sm font-medium text-gray-900 truncate">
+                    {item.product.name}
+                  </h3>
                   <div className="flex items-center justify-between mt-1">
-                    <span className="text-xs text-gray-500">Số lượng: {item.quantity}</span>
-                    <span className="text-sm font-medium">{formatPrice(parseFloat(item.total_price))}</span>
+                    <span className="text-xs text-gray-500">
+                      Số lượng: {item.quantity}
+                    </span>
+                    <span className="text-sm font-medium">
+                      {formatPrice(parseFloat(item.total_price))}
+                    </span>
                   </div>
                   <div className="text-xs text-gray-400">
                     {formatPrice(parseFloat(item.unit_price))} x {item.quantity}
@@ -165,24 +198,32 @@ export default function OrderDetailPage({}: OrderDetailPageProps) {
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Tổng tiền hàng:</span>
-              <span className="text-sm">{formatPrice(parseFloat(orderData.total_amount))}</span>
+              <span className="text-sm">
+                {formatPrice(parseFloat(orderData.total_amount))}
+              </span>
             </div>
             {parseFloat(orderData.total_amount_paid) > 0 && (
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Đã thanh toán:</span>
-                <span className="text-sm text-green-600">{formatPrice(parseFloat(orderData.total_amount_paid))}</span>
+                <span className="text-sm text-green-600">
+                  {formatPrice(parseFloat(orderData.total_amount_paid))}
+                </span>
               </div>
             )}
             {parseFloat(orderData.total_outstanding_amount) > 0 && (
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Còn lại:</span>
-                <span className="text-sm text-red-600">{formatPrice(parseFloat(orderData.total_outstanding_amount))}</span>
+                <span className="text-sm text-red-600">
+                  {formatPrice(parseFloat(orderData.total_outstanding_amount))}
+                </span>
               </div>
             )}
             <HorizontalDivider />
             <div className="flex justify-between">
               <span className="text-base font-semibold">Tổng cộng:</span>
-              <span className="text-base font-semibold text-primary">{formatPrice(parseFloat(orderData.total_amount))}</span>
+              <span className="text-base font-semibold text-primary">
+                {formatPrice(parseFloat(orderData.total_amount))}
+              </span>
             </div>
           </div>
         </div>
@@ -193,17 +234,9 @@ export default function OrderDetailPage({}: OrderDetailPageProps) {
           <div className="space-y-1">
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Ngày đặt hàng:</span>
-              <span className="text-sm">{formatDateTime(orderData.order_date)}</span>
-            </div>
-            {orderData.confirm_order_date && (
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600">Ngày xác nhận:</span>
-                <span className="text-sm">{formatDateTime(orderData.confirm_order_date)}</span>
-              </div>
-            )}
-            <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Cập nhật lần cuối:</span>
-              <span className="text-sm">{formatDateTime(orderData.updated_at)}</span>
+              <span className="text-sm">
+                {formatDateTime(orderData.created_at)}
+              </span>
             </div>
           </div>
         </div>
@@ -212,11 +245,7 @@ export default function OrderDetailPage({}: OrderDetailPageProps) {
       {/* Nút quay lại */}
       <HorizontalDivider />
       <div className="flex-none px-4 py-3">
-        <Button
-          large
-          onClick={() => navigate("/")}
-          className="w-full"
-        >
+        <Button large onClick={() => navigate("/")} className="w-full">
           Quay lại trang chủ
         </Button>
       </div>

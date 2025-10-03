@@ -15,7 +15,7 @@ export interface ProductItemProps {
 export default function ProductItem(props: ProductItemProps) {
   const [selected, setSelected] = useState(false);
   const notDiscountPrice = useMemo(() => {
-    return  props.product.price + props.product.price * (props.product.discount_percent ?? 0) / 100;
+    return props.product.price + 30000;
   }, [props.product]);
   return (
     <TransitionLink

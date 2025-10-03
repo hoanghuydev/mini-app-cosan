@@ -16,20 +16,9 @@ export interface OrderRequest {
   };
 }
 
-export interface OrderResponse {
-  success: boolean;
-  message: string;
-  data?: {
-    orderId: string;
-    totalAmount: number;
-    orderDate: string;
-    mac: string;
-  };
-}
-
 export interface OrderDetailResponse {
   returnCode: number;
-  data: {
+  data?: {
     order_id: number;
     order_code: number;
     tracking_number: string;
@@ -58,11 +47,10 @@ export interface OrderDetailResponse {
     deleted_at: string | null;
     is_deleted: number;
     order_status: {
-      status_id: number;
-      name: string;
-      text_color: string;
-      background_color: string;
       icon: string;
+      background_color: string;
+      text_color: string;
+      name: string;
     };
     order_items: Array<{
       order_item_id: number;
@@ -107,29 +95,36 @@ export interface OrderDetailResponse {
 const ORDER_API_PATH = "/orders";
 const ORDER_DETAIL_API_PATH = "/orders";
 const ORDER_MAC_API_PATH = "/orders/mac";
-export const createOrder = async (orderData: OrderRequest): Promise<OrderResponse> => {
+export const createOrder = async (
+  orderData: OrderRequest
+): Promise<OrderDetailResponse> => {
   try {
-    const response = await request<OrderResponse>(ORDER_API_PATH, {
+    const response = await request<OrderDetailResponse>(ORDER_API_PATH, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({...orderData, token: 'Kwewjf23Kasfj!kCAMp23daed@mqpqwcasw'}),
+      body: JSON.stringify({
+        ...orderData,
+        token: "Kwewjf23Kasfj!kCAMp23daed@mqpqwcasw",
+      }),
     });
-    
+
     // Server response sẽ có success: false và message từ server nếu có lỗi
     return response;
   } catch (error) {
-    console.error('Error creating order:', error);
+    console.error("Error creating order:", error);
     // Chỉ trả về fallback message khi không thể kết nối đến server
     return {
-      success: false,
-      message: "Không thể kết nối đến server. Vui lòng thử lại sau.",
+      returnCode: 0,
+      data: undefined,
     };
   }
 };
 
-export const getMac = async (data: any): Promise<{success: boolean, message: string, data: {mac: string}}> => {
+export const getMac = async (
+  data: any
+): Promise<{ returnCode: number; data: { mac: string } }> => {
   try {
     const response = await request<any>(`${ORDER_MAC_API_PATH}`, {
       method: "POST",
@@ -140,27 +135,31 @@ export const getMac = async (data: any): Promise<{success: boolean, message: str
     });
     return response;
   } catch (error) {
-    console.error('Error getting mac:', error);
+    console.error("Error getting mac:", error);
     return {
-      success: false,
-      message: "Không thể kết nối đến server. Vui lòng thử lại sau.",
-      data: {mac: ''},
+      returnCode: 0,
+      data: { mac: "" },
     };
   }
 };
 
-export const getOrderDetail = async (orderId: string): Promise<OrderDetailResponse> => {
+export const getOrderDetail = async (
+  orderId: string
+): Promise<OrderDetailResponse> => {
   try {
-    const response = await request<OrderDetailResponse>(`${ORDER_DETAIL_API_PATH}/${orderId}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    
+    const response = await request<OrderDetailResponse>(
+      `${ORDER_DETAIL_API_PATH}/${orderId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
     return response;
   } catch (error) {
-    console.error('Error getting order detail:', error);
+    console.error("Error getting order detail:", error);
     throw error;
   }
 };

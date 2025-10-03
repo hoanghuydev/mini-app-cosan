@@ -1,11 +1,7 @@
 import Button from "@/components/button";
 import HorizontalDivider from "@/components/horizontal-divider";
 import { useAtomValue } from "jotai";
-import {
-  useLocation,
-  useNavigate,
-  useParams,
-} from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { productState } from "@/state";
 import { formatPrice } from "@/utils/format";
 import ShareButton from "./share-buttont";
@@ -16,8 +12,8 @@ import RelatedProducts from "./related-products";
 import { useAddToCart } from "@/hooks";
 import toast from "react-hot-toast";
 import { Color, Size } from "@/types";
-import useEmblaCarousel from 'embla-carousel-react';
-import Autoplay from 'embla-carousel-autoplay';
+import useEmblaCarousel from "embla-carousel-react";
+import Autoplay from "embla-carousel-autoplay";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -28,10 +24,9 @@ export default function ProductDetailPage() {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   // Carousel setup with autoplay
-  const [emblaRef, emblaApi] = useEmblaCarousel(
-    { loop: true },
-    [Autoplay({ delay: 3000, stopOnInteraction: false })]
-  );
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [
+    Autoplay({ delay: 3000, stopOnInteraction: false }),
+  ]);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -41,14 +36,14 @@ export default function ProductDetailPage() {
   useEffect(() => {
     if (!emblaApi) return;
     onSelect();
-    emblaApi.on('select', onSelect);
-    emblaApi.on('reInit', onSelect);
+    emblaApi.on("select", onSelect);
+    emblaApi.on("reInit", onSelect);
   }, [emblaApi, onSelect]);
 
   // Get images for carousel
   const getProductImages = () => {
     if (product.images && product.images.length > 0) {
-      return product.images.map(img => img.file_url);
+      return product.images.map((img) => img.file_url);
     }
     return product.thumbnail_url ? [product.thumbnail_url] : [];
   };
@@ -78,7 +73,10 @@ export default function ProductDetailPage() {
               <div className="embla" ref={emblaRef}>
                 <div className="embla__container flex">
                   {productImages.map((imageUrl, index) => (
-                    <div key={index} className="embla__slide flex-[0_0_100%] min-w-0">
+                    <div
+                      key={index}
+                      className="embla__slide flex-[0_0_100%] min-w-0"
+                    >
                       <img
                         src={imageUrl}
                         alt={`${product.name} - ${index + 1}`}
@@ -96,7 +94,7 @@ export default function ProductDetailPage() {
                     <button
                       key={index}
                       className={`w-2 h-2 rounded-full transition-colors ${
-                        index === selectedIndex ? 'bg-primary' : 'bg-gray-300'
+                        index === selectedIndex ? "bg-primary" : "bg-gray-300"
                       }`}
                       onClick={() => emblaApi?.scrollTo(index)}
                     />
@@ -106,7 +104,7 @@ export default function ProductDetailPage() {
             ) : (
               <img
                 key={product.id}
-                src={productImages[0] || '/placeholder-image.png'}
+                src={productImages[0] || "/placeholder-image.png"}
                 alt={product.name}
                 className="w-full h-80 object-cover rounded-lg"
                 style={{
@@ -118,20 +116,23 @@ export default function ProductDetailPage() {
           <div className="text-xl font-medium text-primary">
             {formatPrice(product.price)}
           </div>
-          {!!product.original_price && (
+          {!!product.price && (
             <div className="text-2xs text-subtitle line-through">
-              {formatPrice(product.original_price)}
+              {formatPrice(product.price + 30000)}
             </div>
           )}
-          <div className="text-lg font-semibold mt-1">{product.name ?? product.official_name}</div>
-          
+          <div className="text-lg font-semibold mt-1">
+            {product.name ?? product.official_name}
+          </div>
+
           {/* Mô tả sản phẩm */}
           {(product.short_description || product.full_description) && (
             <div className="py-3">
               <div
                 className="text-sm text-gray-700 leading-relaxed"
                 dangerouslySetInnerHTML={{
-                  __html: product.full_description || product.short_description || "",
+                  __html:
+                    product.full_description || product.short_description || "",
                 }}
               />
             </div>
@@ -179,7 +180,7 @@ export default function ProductDetailPage() {
             />
           )}
         </div>
-        
+
         {/* Thông tin chi tiết sản phẩm */}
         <div className="bg-section h-2 w-full"></div>
         <div className="px-4 py-4">
@@ -189,11 +190,23 @@ export default function ProductDetailPage() {
               <div className="bg-gray-50 rounded-lg p-4">
                 <div className="flex items-center mb-3">
                   <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    <svg
+                      className="w-4 h-4 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
                     </svg>
                   </div>
-                  <h3 className="font-medium text-gray-900">Thông tin sản phẩm</h3>
+                  <h3 className="font-medium text-gray-900">
+                    Thông tin sản phẩm
+                  </h3>
                 </div>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
@@ -205,35 +218,70 @@ export default function ProductDetailPage() {
             )}
 
             {/* Thành phần chi tiết */}
-            {product.detailed_ingredients && product.detailed_ingredients.trim() && (
-              <div className="bg-green-50 rounded-lg p-4">
-                <div className="flex items-center mb-3">
-                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                    <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                    </svg>
+            {product.detailed_ingredients &&
+              product.detailed_ingredients.trim() && (
+                <div className="bg-green-50 rounded-lg p-4">
+                  <div className="flex items-center mb-3">
+                    <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                      <svg
+                        className="w-4 h-4 text-green-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+                        />
+                      </svg>
+                    </div>
+                    <h3 className="font-medium text-gray-900">
+                      Thành phần chi tiết
+                    </h3>
                   </div>
-                  <h3 className="font-medium text-gray-900">Thành phần chi tiết</h3>
+                  <div
+                    className="text-sm text-gray-700 leading-relaxed whitespace-pre-line"
+                    dangerouslySetInnerHTML={{
+                      __html: product.detailed_ingredients,
+                    }}
+                  />
                 </div>
-                <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line" dangerouslySetInnerHTML={{ __html: product.detailed_ingredients }} />
-              </div>
-            )}
+              )}
 
             {/* Hướng dẫn sử dụng */}
-            {product.usage_instructions && product.usage_instructions.trim() && (
-              <div className="bg-blue-50 rounded-lg p-4">
-                <div className="flex items-center mb-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+            {product.usage_instructions &&
+              product.usage_instructions.trim() && (
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <div className="flex items-center mb-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                      <svg
+                        className="w-4 h-4 text-blue-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    </div>
+                    <h3 className="font-medium text-gray-900">
+                      Hướng dẫn sử dụng
+                    </h3>
                   </div>
-                  <h3 className="font-medium text-gray-900">Hướng dẫn sử dụng</h3>
+                  <div
+                    className="text-sm text-gray-700 leading-relaxed whitespace-pre-line"
+                    dangerouslySetInnerHTML={{
+                      __html: product.usage_instructions,
+                    }}
+                  />
                 </div>
-                <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line" dangerouslySetInnerHTML={{ __html: product.usage_instructions }} />
-              </div>
-            )}
-
+              )}
           </div>
         </div>
 
