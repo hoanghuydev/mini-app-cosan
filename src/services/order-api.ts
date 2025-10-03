@@ -18,6 +18,8 @@ export interface OrderRequest {
 
 export interface OrderDetailResponse {
   returnCode: number;
+  returnMessage?: string;
+  errors?: Record<string, string[]>;
   data?: {
     order_id: number;
     order_code: number;
@@ -117,6 +119,7 @@ export const createOrder = async (
     // Chỉ trả về fallback message khi không thể kết nối đến server
     return {
       returnCode: 0,
+      returnMessage: "Không thể kết nối đến server",
       data: undefined,
     };
   }

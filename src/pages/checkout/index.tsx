@@ -140,13 +140,31 @@ export default function CheckoutPage() {
       },
     };
 
-    // Call api create order
-    const response = await createOrder(merchantOrderData);
-    const orderCode = response.data?.order_code?.toString() || "";
-    if (!orderCode) {
-      toast.error("Lỗi khi tạo đơn hàng, vui lòng thử lại sau!");
+    try {
+      // Call api create order
+      const response = await createOrder(merchantOrderData);
+      
+      if (response.returnCode !== 1) {
+        // Handle validation errors
+        if (response.errors) {
+          const errorMessages = Object.values(response.errors).flat();
+          toast.error(errorMessages.join(", "));
+        } else {
+          toast.error(response.returnMessage || "Lỗi khi tạo đơn hàng");
+        }
+        throw new Error(response.returnMessage || "Order creation failed");
+      }
+      
+      const orderCode = response.data?.order_code?.toString() || "";
+      if (!orderCode) {
+        toast.error("Lỗi khi tạo đơn hàng, vui lòng thử lại sau!");
+        throw new Error("No order code returned");
+      }
+      return orderCode;
+    } catch (error) {
+      console.error("Create order error:", error);
+      throw error; // Re-throw để handleSubmit có thể catch
     }
-    return orderCode;
   };
 
   const validateForm = () => {
@@ -157,6 +175,13 @@ export default function CheckoutPage() {
 
     if (!formData.phone.trim()) {
       toast.error("Vui lòng nhập số điện thoại");
+      return false;
+    }
+
+    // Validate phone number format
+    const phoneRegex = /^(?:\+84|84|0)[35789]\d{8}$/;
+    if (!phoneRegex.test(formData.phone.trim())) {
+      toast.error("Số điện thoại không đúng định dạng (VD: 0901234567)");
       return false;
     }
 
@@ -209,9 +234,16 @@ export default function CheckoutPage() {
         ...orderDataForMac,
         mac: mac || "",
         success: async (data) => {
-          const orderId = await createOrderMerchant();
-          navigate(`/checkout-success/${orderId}?status=success`);
-          setCart([]);
+          try {
+            const orderId = await createOrderMerchant();
+            if (orderId) {
+              navigate(`/checkout-success/${orderId}?status=success`);
+              setCart([]);
+            }
+          } catch (error) {
+            // Không redirect nếu có lỗi tạo đơn hàng
+            console.error("Order creation failed in success callback:", error);
+          }
         },
         fail: (err) => {
           toast.error(err.message || "Có lỗi xảy ra khi đặt hàng");

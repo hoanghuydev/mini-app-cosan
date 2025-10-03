@@ -15,7 +15,7 @@ export const featureProductsState = atom(async () => {
       returnCode: number;
       data: Product[];
     }>(
-      "/products?limit=10&page=1", 
+      "/products?limit=20&page=1", 
       {
         returnCode: 0,
         data: []
